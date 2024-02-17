@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:MlinetlesHyperNative.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MlinetlesHyperNative.Encrypt"
+			 x:DataType="vm:EncryptViewModel">
+	<UserControl.DataContext>
+		<vm:EncryptViewModel />
+	</UserControl.DataContext>
+	
+	<StackPanel Classes="main">
+		<StackPanel.Styles>
+			<Style Selector="StackPanel.main > :is(Control)">
+				<Setter Property="Margin" Value="0 15" />
+			</Style>
+		</StackPanel.Styles>
+		
+		<TextBlock FontWeight="Bold" FontSize="25" Text="加密页面" />
+		<StackPanel Orientation="Horizontal">
+			<TextBox Watermark="使用Base64字符串" Width="143" MinHeight="83" TextWrapping="Wrap" Text="{Binding Key}" />
+			<Button Classes="accent" Margin="10 0" VerticalAlignment="Top" Command="{Binding RandomKey}">生成随机密钥</Button>
+		</StackPanel>
+		<Button Classes="accent" Command="{Binding SelectFile}" CommandParameter="{Binding $self}">选择文件</Button>
+		<Button Classes="accent" Command="{Binding EncryptDownload}" CommandParameter="{Binding $self}">加密并下载</Button>
+		<Button Classes="accent" Command="{Binding EncryptShare}" CommandParameter="{Binding $self}">加密并分享</Button>
+		<Button Classes="accent" Command="{Binding EncryptOpen}" CommandParameter="{Binding $self}">加密并打开</Button>
+		<TextBlock Text="{Binding Message}" />
+	</StackPanel>
+</UserControl>

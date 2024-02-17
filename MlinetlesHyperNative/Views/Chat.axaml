@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:MlinetlesHyperNative.ViewModels"
+			 xmlns:main="using:MlinetlesHyperNative"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MlinetlesHyperNative.Chat"
+			 x:DataType="vm:ChatViewModel">
+	<UserControl.DataContext>
+		<vm:ChatViewModel />
+	</UserControl.DataContext>
+	
+	<DockPanel Classes="main">
+		<DockPanel.Styles>
+			<Style Selector="DockPanel.main > :is(Control)">
+				<Setter Property="Margin" Value="0 12" />
+			</Style>
+		</DockPanel.Styles>
+		
+		<DockPanel DockPanel.Dock="Bottom" Margin="0 10 0 0" Background="#E6E6E6">
+			<DockPanel DockPanel.Dock="Top" Margin="10 2">
+				<Button Name="send" Classes="accent" DockPanel.Dock="Right" Height="33" Width="48" VerticalAlignment="Top" Command="{Binding Send}" IsVisible="{Binding Input, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">发送</Button>
+				<Button DockPanel.Dock="Right" Background="#E6E6E6" Height="33" Width="48" VerticalAlignment="Top" Click="OpenMenu" IsVisible="{Binding Input, Converter={x:Static StringConverters.IsNullOrEmpty}}">
+					<Button.Template>
+						<ControlTemplate>
+							<ContentPresenter Content="{TemplateBinding Content}" />
+						</ControlTemplate>
+					</Button.Template>
+					<PathIcon Data="{StaticResource add_circle_regular}">
+						<PathIcon.Styles>
+							<Style Selector="PathIcon">
+								<Setter Property="RenderTransform" Value="rotate(0)" />
+							</Style>
+							<Style Selector="PathIcon.open">
+								<Setter Property="RenderTransform" Value="rotate(45deg)" />
+							</Style>
+						</PathIcon.Styles>
+						<PathIcon.Transitions>
+							<Transitions>
+								<TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.05" Easing="SineEaseInOut" />
+							</Transitions>
+						</PathIcon.Transitions>
+					</PathIcon>
+				</Button>
+				<TextBox Text="{Binding Input}" Background="White" TextWrapping="WrapWithOverflow" LineHeight="20" AcceptsReturn="True" TextInputOptions.ReturnKeyType='Send' />
+			</DockPanel>
+			<Grid Name="menu" ColumnDefinitions="*, *" IsVisible="False">
+				<Button Grid.Column="0" Classes="accent" HorizontalAlignment="Left" Command="{Binding WaitForConnect}" CommandParameter="{Binding $self}">查找公网IP等待连接</Button>
+				<Button Grid.Column="1" Classes="accent" HorizontalAlignment="Right" Command="{Binding ConnectFromClipboard}" CommandParameter="{Binding $self}">通过剪贴板连接</Button>
+			</Grid>
+		</DockPanel>
+
+		<DockPanel DockPanel.Dock="Top" Margin="8 4">
+			<Button Click="Exit" Foreground="Gray">
+				<Button.Template>
+					<ControlTemplate>
+						<ContentPresenter Content="{TemplateBinding Content}" />
+					</ControlTemplate>
+				</Button.Template>
+				
+				<PathIcon Data="{StaticResource chevron_left_regular}" />
+			</Button>
+			<TextBlock Margin="5" IsVisible="{Binding !Connected}">未连接</TextBlock>
+			<TextBlock Margin="5" IsVisible="{Binding Connected}">已连接</TextBlock>
+		</DockPanel>
+		
+		<ScrollViewer>
+			<ItemsControl ItemsSource="{Binding Messages}">
+				<ItemsControl.DataTemplates>
+					<DataTemplate DataType="{x:Type vm:Message}">
+						<Panel Width="NaN" Margin="8" HorizontalAlignment="{Binding Alignment}">
+							<Border CornerRadius="10" Background="#E6E6E6" BorderThickness="2" Padding="5">
+								<TextBlock Text="{Binding Content}" MaxWidth="{OnPlatform 700, Android=200, iOS=200}" TextWrapping="WrapWithOverflow" />
+							</Border>
+						</Panel>
+					</DataTemplate>
+				</ItemsControl.DataTemplates>
+			</ItemsControl>
+		</ScrollViewer>
+		
+	</DockPanel>
+</UserControl>

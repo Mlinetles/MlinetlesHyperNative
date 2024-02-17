@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:MlinetlesHyperNative.ViewModels"
+			 xmlns:main="clr-namespace:MlinetlesHyperNative"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MlinetlesHyperNative.Views.MainView"
+             x:DataType="vm:MainViewModel">
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:MainViewModel />
+	</Design.DataContext>
+	<SplitView Name="chat" IsPaneOpen="False" DisplayMode="Overlay" PanePlacement="Right" OpenPaneLength="{Binding $self.Bounds.Width}" PaneBackground="White">
+		<SplitView.Pane>
+			<main:Chat />
+		</SplitView.Pane>
+		
+		<SplitView Name="navMenu" OpenPaneLength="100" IsPaneOpen="{OnPlatform True, Android=False, iOS=False}" DisplayMode="CompactInline">
+			<SplitView.Pane>
+				<StackPanel Margin="5">
+					<StackPanel.Styles>
+						<Style Selector="#navMenu > StackPanel > :is(Button):not(.accent)">
+							<Setter Property="IsVisible" Value="{Binding $parent.IsPaneOpen}" />
+							<Setter Property="HorizontalAlignment" Value="Center" />
+							<Setter Property="Margin" Value="0 10 0 0" />
+							<Setter Property="FontWeight" Value="Bold" />
+							<Setter Property="FontSize" Value="20" />
+							<Setter Property="Background" Value="Gray" />
+							<Setter Property="Template">
+								<ControlTemplate>
+									<Border>
+									<DockPanel>
+										<PathIcon DockPanel.Dock="Left" Height="17" Foreground="{TemplateBinding Foreground}" Data="{TemplateBinding Tag}" />
+										<TextBlock
+											Margin="2 1 2 0"
+											FontSize="{TemplateBinding FontSize}"
+											FontWeight="{TemplateBinding FontWeight}"
+											Foreground="{TemplateBinding Foreground}"
+											Text="{TemplateBinding Content}" />
+									</DockPanel>
+									</Border>
+								</ControlTemplate>
+							</Setter>
+
+							<Style Selector="^:checked">
+								<Setter Property="Foreground" Value="MediumBlue" />
+							</Style>
+						</Style>
+					</StackPanel.Styles>
+					<Button Classes="accent" HorizontalAlignment="Right" Click="NavMenuSwitch">
+						<PathIcon Foreground="White" Height="18" Width="18" Data="{OnPlatform {StaticResource chevron_left_regular}, Android={StaticResource chevron_right_regular}, iOS={StaticResource chevron_right_regular}}" />
+					</Button>
+					<RadioButton Click="NavMenuClick" Tag="{StaticResource home_regular}" GroupName="NavMenu" IsChecked="true">主页</RadioButton>
+					<Button Click="ChatClick" Tag="{StaticResource chat_regular}">聊天</Button>
+					<RadioButton Click="NavMenuClick" Tag="{StaticResource lock_regular}" GroupName="NavMenu">加密</RadioButton>
+					<RadioButton Click="NavMenuClick" Tag="{StaticResource key_regular}" GroupName="NavMenu">解密</RadioButton>
+				</StackPanel>
+			</SplitView.Pane>
+			<DockPanel Name="mainLayOut">
+				<DockPanel.Styles>
+					<Style Selector="#mainLayOut > :is(Control):not(#header)">
+						<Setter Property="Margin" Value="20" />
+					</Style>
+				</DockPanel.Styles>
+				<Panel Name="header" DockPanel.Dock="Top" Background="MediumBlue">
+					<TextBlock Margin="18" FontSize="22" FontWeight="Bold" Foreground="White">MlinetlesHyper</TextBlock>
+				</Panel>
+				<TabControl Name="tabControl">
+					<TabControl.Styles>
+						<Style Selector="TabItem">
+							<Setter Property="IsVisible" Value="False" />
+						</Style>
+					</TabControl.Styles>
+					<TabItem>
+						<main:Home />
+					</TabItem>
+					<TabItem>
+						<main:Encrypt />
+					</TabItem>
+					<TabItem>
+						<main:Decrypt />
+					</TabItem>
+				</TabControl>
+			</DockPanel>
+		</SplitView>
+	</SplitView>
+</UserControl>
