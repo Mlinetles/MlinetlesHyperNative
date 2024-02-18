@@ -8,7 +8,7 @@ namespace MlinetlesHyperNative.ViewModels
 
         private readonly Pipe receive = new();
 
-        private NetworkStream? stream = null;
+        private Socket? client = null;
 
         private readonly CancellationTokenSource cancel = new();
 
@@ -45,11 +45,11 @@ namespace MlinetlesHyperNative.ViewModels
 
                 if (info is null) return;
 
-                using var client = new TcpClient();
+                var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
                 try
                 {
-                    await client.ConnectAsync(info.IP, info.Port);
+                    await socket.ConnectAsync(info.IP, info.Port);
                 }
                 catch (SocketException)
                 {
@@ -58,7 +58,7 @@ namespace MlinetlesHyperNative.ViewModels
 
                 Connected = true;
 
-                stream = client.GetStream();
+                client = socket;
 
                 await StartConnectAsync();
 
@@ -66,11 +66,11 @@ namespace MlinetlesHyperNative.ViewModels
                 {
                     try
                     {
-                        var length = await stream.ReadAsync(receive.Writer.GetMemory());
+                        var length = await socket.ReceiveAsync(receive.Writer.GetMemory());
 
                         if (length == 0)
                         {
-                            await stream.WriteAsync([1], 0, 1);
+                            await socket.SendAsync(new byte[] { 1 });
                             if (!client.Connected) break;
                         }
 
@@ -78,7 +78,7 @@ namespace MlinetlesHyperNative.ViewModels
 
                         await receive.Writer.FlushAsync();
                     }
-                    catch (IOException e) when (e.InnerException is SocketException exc && exc.NativeErrorCode != 10035)
+                    catch (SocketException e) when (e.NativeErrorCode != 10035)
                     {
                         break;
                     }
@@ -91,19 +91,21 @@ namespace MlinetlesHyperNative.ViewModels
             {
                 var clipboard = TopLevel.GetTopLevel(button)?.Clipboard ?? throw new NullReferenceException();
 
-                using var listener = new TcpListener(IPAddress.Any, 0);
+                using var listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
-                listener.Start();
+                listener.Bind(new IPEndPoint(IPAddress.IPv6Any, 0));
 
-                await clipboard.SetTextAsync(JsonSerializer.Serialize<ConnectInfo>(new(PublicIP!, ((IPEndPoint)listener.LocalEndpoint).Port)));
+                listener.Listen();
 
-                using var client = await listener.AcceptTcpClientAsync();
+                await clipboard.SetTextAsync(JsonSerializer.Serialize<ConnectInfo>(new(PublicIP!, ((IPEndPoint)listener.LocalEndPoint!).Port)));
 
-                listener.Stop();
+                var socket = await listener.AcceptAsync();
+
+                listener.Close();
+
+                client = socket;
 
                 Connected = true;
-
-                stream = client.GetStream();
 
                 await StartConnectAsync();
 
@@ -111,11 +113,11 @@ namespace MlinetlesHyperNative.ViewModels
                 {
                     try
                     {
-                        var length = await stream.ReadAsync(receive.Writer.GetMemory());
+                        var length = await client.ReceiveAsync(receive.Writer.GetMemory());
 
                         if (length == 0)
                         {
-                            await stream.WriteAsync([1], 0, 1);
+                            await client.SendAsync(new byte[] { 1 });
                             if (!client.Connected) break;
                         }
 
@@ -125,7 +127,7 @@ namespace MlinetlesHyperNative.ViewModels
 
                         await receive.Writer.FlushAsync();
                     }
-                    catch (IOException e) when (e.InnerException is SocketException exc && exc.NativeErrorCode != 10035)
+                    catch (SocketException e) when (e.NativeErrorCode != 10035)
                     {
                         break;
                     }
@@ -188,7 +190,7 @@ namespace MlinetlesHyperNative.ViewModels
         async Task OnSend(Message message)
         {
             message.Alignment = HorizontalAlignment.Right;
-            if (stream is null) return;
+            if (client is null) return;
             var iv = RandomBytes(12);
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message));
             var result = new byte[12 + 16 + bytes.Length];
@@ -198,11 +200,11 @@ namespace MlinetlesHyperNative.ViewModels
             aes.Encrypt(iv, bytes, result.AsSpan(12 + 16, bytes.Length), result.AsSpan(12, 16), iv);
             try
             {
-                await stream.WriteAsync(result);
-                if (stream.Socket.Connected) Messages.Add(message);
+                await client.SendAsync(result);
+                if (client.Connected) Messages.Add(message);
                 else Disconnect();
             }
-            catch (IOException)
+            catch (SocketException)
             {
                 Disconnect();
             }
@@ -216,10 +218,10 @@ namespace MlinetlesHyperNative.ViewModels
             await receive.Reader.CompleteAsync();
             await receive.Writer.CompleteAsync();
             receive.Reset();
-            stream?.Socket.Disconnect(false);
-            stream?.Close();
-            stream?.Dispose();
-            stream = null;
+            client?.Disconnect(false);
+            client?.Close();
+            client?.Dispose();
+            client = null;
         }
 
         async void GetPublicIP()
@@ -243,8 +245,8 @@ namespace MlinetlesHyperNative.ViewModels
         {
             var pair = X25519.X25519KeyAgreement.GenerateKeyPair();
             var other = new byte[32];
-            await stream!.WriteAsync(pair.PublicKey);
-            await stream!.ReadAsync(other);
+            await client!.SendAsync(pair.PublicKey);
+            await client!.ReceiveAsync(other);
             key = X25519.X25519KeyAgreement.Agreement(pair.PrivateKey, other);
         }
     }
