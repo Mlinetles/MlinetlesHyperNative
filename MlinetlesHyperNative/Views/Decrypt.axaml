@@ -19,7 +19,8 @@
 		
 		<TextBlock FontWeight="Bold" FontSize="25" Text="解密页面" />
 		<StackPanel Orientation="Horizontal">
-			<TextBox Watermark="使用Base64字符串" Width="143" MinHeight="83" TextWrapping="Wrap" Text="{Binding Key}" />
+			<TextBox Name="decryptInput" Classes="noContextMenu" Watermark="使用Base64字符串" Width="143" MinHeight="83" TextWrapping="Wrap" Text="{Binding Key}" IsReadOnly="{OnPlatform False, Android=True, iOS=True}" />
+			<Button Classes="accent" Margin="10 0" VerticalAlignment="Top" Click="Paste">从剪贴板粘贴</Button>
 		</StackPanel>
 		<Button Classes="accent" Command="{Binding SelectFile}" CommandParameter="{Binding $self}">选择文件</Button>
 		<Button Classes="accent" Command="{Binding DecryptDownload}" CommandParameter="{Binding $self}">解密并下载</Button>

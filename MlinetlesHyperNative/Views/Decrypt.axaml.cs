@@ -10,4 +10,10 @@ public partial class Decrypt : UserControl
     {
         InitializeComponent();
     }
+
+    void Paste(object sender, RoutedEventArgs e)
+    {
+        decryptInput.Text = null;
+        decryptInput.Paste();
+    }
 }

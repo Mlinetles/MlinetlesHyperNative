@@ -60,6 +60,8 @@ namespace MlinetlesHyperNative
 
         public static Func<string, byte[], Task>? OpenImpl { get; set; }
 
+        public static Action<string>? ToastImpl { get; set; }
+
         public static string ToMime(string name) => name switch
         {
             "jpg" => "image/jpeg",

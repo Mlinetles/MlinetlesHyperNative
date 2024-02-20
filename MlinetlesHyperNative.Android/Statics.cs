@@ -40,5 +40,10 @@ public static class Statics
             intent.SetDataAndType(uri, ToMime(name.Split('.')[^1]));
             activity.StartActivity(intent);
         };
+
+        ToastImpl = content =>
+        {
+            Toast.MakeText(activity, content, ToastLength.Short)!.Show();
+        };
     }
 }

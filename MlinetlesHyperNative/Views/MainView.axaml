@@ -59,15 +59,10 @@
 				</StackPanel>
 			</SplitView.Pane>
 			<DockPanel Name="mainLayOut">
-				<DockPanel.Styles>
-					<Style Selector="#mainLayOut > :is(Control):not(#header)">
-						<Setter Property="Margin" Value="20" />
-					</Style>
-				</DockPanel.Styles>
 				<Panel Name="header" DockPanel.Dock="Top" Background="MediumBlue">
 					<TextBlock Margin="18" FontSize="22" FontWeight="Bold" Foreground="White">MlinetlesHyper</TextBlock>
 				</Panel>
-				<TabControl Name="tabControl">
+				<TabControl Name="tabControl" Margin="{OnPlatform 20, Android=10, iOS=10}">
 					<TabControl.Styles>
 						<Style Selector="TabItem">
 							<Setter Property="IsVisible" Value="False" />

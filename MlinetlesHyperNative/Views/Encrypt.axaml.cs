@@ -10,4 +10,16 @@ public partial class Encrypt : UserControl
     {
         InitializeComponent();
     }
+
+    void Copy(object sender, RoutedEventArgs e)
+    {
+        encryptInput.SelectAll();
+        encryptInput.Copy();
+    }
+
+    void Paste(object sender, RoutedEventArgs e)
+    {
+        encryptInput.Text = null;
+        encryptInput.Paste();
+    }
 }

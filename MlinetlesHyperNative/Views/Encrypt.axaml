@@ -19,8 +19,12 @@
 		
 		<TextBlock FontWeight="Bold" FontSize="25" Text="加密页面" />
 		<StackPanel Orientation="Horizontal">
-			<TextBox Watermark="使用Base64字符串" Width="143" MinHeight="83" TextWrapping="Wrap" Text="{Binding Key}" />
-			<Button Classes="accent" Margin="10 0" VerticalAlignment="Top" Command="{Binding RandomKey}">生成随机密钥</Button>
+			<TextBox Name="encryptInput" Classes="noContextMenu" Watermark="使用Base64字符串" Width="143" MinHeight="83" TextWrapping="Wrap" Text="{Binding Key}" IsReadOnly="{OnPlatform False, Android=True, iOS=True}" />
+			<StackPanel>
+				<Button Classes="accent" Margin="10 3" Command="{Binding RandomKey}">生成随机密钥</Button>
+				<Button Classes="accent" Margin="10 3" Click="Copy">复制密钥</Button>
+				<Button Classes="accent" Margin="10 3" Click="Paste">从剪贴板粘贴</Button>
+			</StackPanel>
 		</StackPanel>
 		<Button Classes="accent" Command="{Binding SelectFile}" CommandParameter="{Binding $self}">选择文件</Button>
 		<Button Classes="accent" Command="{Binding EncryptDownload}" CommandParameter="{Binding $self}">加密并下载</Button>

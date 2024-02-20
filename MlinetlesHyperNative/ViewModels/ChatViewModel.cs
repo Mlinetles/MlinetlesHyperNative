@@ -212,6 +212,7 @@ namespace MlinetlesHyperNative.ViewModels
 
         async void Disconnect()
         {
+            ToastImpl?.Invoke("连接已断开！");
             await cancel.CancelAsync();
             Connected = false;
             receive.Reader.CancelPendingRead();
@@ -248,6 +249,7 @@ namespace MlinetlesHyperNative.ViewModels
             await client!.SendAsync(pair.PublicKey);
             await client!.ReceiveAsync(other);
             key = X25519.X25519KeyAgreement.Agreement(pair.PrivateKey, other);
+            ToastImpl?.Invoke("已连接！");
         }
     }
 
